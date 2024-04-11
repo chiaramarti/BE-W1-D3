@@ -19,42 +19,58 @@ try {
     die("Errore di connessione al database: " . $e->getMessage());
 }
 
-// inserire un nuovo utente
-    $sql = "INSERT INTO users (name, surname, email, password) VALUES (:name, :surname, :email, :password)";
-    $stmt = $pdo->prepare($sql);
-    // $stmt->execute(['name' => 'chiara', 'surname' => 'martinelli', 'email' => 'cm@gmail.com', 'password' => 'asdf']);
-    // $stmt->execute(['name' => 'nicole', 'surname' => 'maini', 'email' => 'nm@gmail.com', 'password' => 'ghjk']);
+// Inserire un nuovo utente
+$stmt = $pdo->prepare("INSERT INTO users (name, surname, email, password) VALUES (:name, :surname, :email, :password)");
+$stmt->execute(['name' => 'chiara', 'surname' => 'martinelli', 'email' => 'cm@gmail.com', 'password' => 'asdf']);
+$stmt->execute(['name' => 'nicole', 'surname' => 'maini', 'email' => 'nm@gmail.com', 'password' => 'ghjk']);
 
+// Ottenere la lista di tutti gli utenti
+$stmt = $pdo->query("SELECT * FROM users");
+$users = $stmt->fetchAll();
 
-// ottenere la lista di tutti gli utenti
-    $sql = "SELECT * FROM users";
-    $stmt = $pdo->query($sql);
-    // $users = $stmt->fetchAll();
-    echo '<ul>';
-    foreach ($stmt as $row){
-        echo "<li>$row[name]</li>";
-    };
-    echo '</ul>';
+echo '<h2>Lista Utenti:</h2>';
+echo '<ul>';
+foreach ($users as $row) {
+    echo "<li>{$row['name']} {$row['surname']} - {$row['email']}</li>";
+}
+echo '</ul>';
 
 // Funzione per ottenere i dettagli di un singolo utente
-    $id = 0;
-    $id = $_GET['id'];
-    $sql = "SELECT * FROM users WHERE id = ?";
-    $stmt = $pdo->prepare($sql);
-    $stmt->execute([$id]);
-    $row = $stmt->fetch();
-    echo "<h2>$row[name]</h2>";
-    echo "<h2>$row[surname]</h2>";
-    echo "<h2>$row[email]</h2>";
+$id = 1;
+$stmt = $pdo->prepare("SELECT * FROM users WHERE id = ?");
+$stmt->execute([$id]);
+$user = $stmt->fetch();
 
-// aggiornare un utente esistente
-    $sql = "UPDATE users SET name=:name, surname=:surname, email=:email, password=:password WHERE id=:id";
-    $stmt = $pdo->prepare($sql);
-    $stmt->execute(['name' => $name, 'surname' => $surname, 'email' => $email, 'password' => $password, 'id' => $id]);
+echo '<h2>Dettagli Utente:</h2>';
+echo "<h3>ID: {$user['id']}</h3>";
+echo "<h3>Nome: {$user['name']}</h3>";
+echo "<h3>Cognome: {$user['surname']}</h3>";
+echo "<h3>Email: {$user['email']}</h3>";
 
-// per eliminare un utente
-    $sql = "DELETE FROM users WHERE id=:id";
-    $stmt = $pdo->prepare($sql);
-    $stmt->execute(['id' => $id]);
+// Aggiornare un utente esistente
+$id = 2;
+$name = 'Nuovo Nome';
+$surname = 'Nuovo Cognome';
+$email = 'nuovaemail@gmail.com';
+$password = 'nuovapassword';
+$stmt = $pdo->prepare("UPDATE users SET name=:name, surname=:surname, email=:email, password=:password WHERE id=:id");
+$stmt->execute(['name' => $name, 'surname' => $surname, 'email' => $email, 'password' => $password, 'id' => $id]);
+
+// Per eliminare un utente
+$idToDelete = 1;
+$stmt = $pdo->prepare("DELETE FROM users WHERE id=:id");
+$stmt->execute(['id' => $idToDelete]);
+
+// Stampare la lista degli utenti rimasti
+$stmt = $pdo->query("SELECT * FROM users");
+$remaining_users = $stmt->fetchAll();
+
+echo '<h2>Lista Utenti Rimasti:</h2>';
+echo '<ul>';
+foreach ($remaining_users as $row) {
+    echo "<li>{$row['name']} {$row['surname']} - {$row['email']}</li>";
+}
+echo '</ul>';
+?>
 
 
